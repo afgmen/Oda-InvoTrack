@@ -10,25 +10,86 @@ Use **PRD v0.9.1 — Oda InvoTrack** as the product source of truth.
 The MVP is a tracker. It is not an invoice issuer, accounting system, tax portal automation
 system, system of record, or long-term invoice archive.
 
-## Environment & Stack (decide before planning run)
+## Environment & Stack
 
-This is a required decision, not an assumption. Confirm it before Codex's first planning run,
-because every migration, model convention, and auth integration depends on it.
+Oda InvoTrack is an **independent, standalone product/service**, not a module inside the
+existing Oda system.
 
-* **Deployment shape:** InvoTrack is expected to be built as a **module inside the existing
-  Oda system** so it can reuse Oda's auth, admin, file storage, and email stack. If instead
-  it is a standalone service, say so explicitly — do not infer.
-* **Default stack (confirm with PM):** Laravel + MySQL, matching the existing Oda system.
-  Do not proceed on this default silently; the planning run must state the detected stack and
-  flag any mismatch.
+It may integrate with Oda later through API, webhook, SSO, or data sync, but **Phase 1 must
+not depend on the existing Oda application codebase**.
+
+Codex must **not** assume an existing Oda Laravel repo is available. This repository started as
+a new standalone repo with planning documents only. If no application scaffold exists, Codex
+should propose a standalone scaffold (Phase 0) before any InvoTrack model work.
+
+Preferred stack for Phase 0 (chosen for this product on its own merits and for a
+GitHub-based release/iteration workflow, similar to prior projects released via GitHub):
+
+* **Application:** Next.js + TypeScript
+* **UI:** Tailwind CSS + shadcn/ui
+* **Database:** Supabase Postgres
+* **Auth:** Supabase Auth (for the authenticated company admin / accounting side)
+* **File storage:** Supabase Storage (tracking-window files only — see rule below)
+* **Deployment:** Vercel connected to GitHub (PR preview deploys → production on main)
+* **CI:** GitHub Actions (lint, typecheck, tests, build)
+* **Tests:** Vitest for logic/domain, Playwright for main user flows
+* **QR generation:** a Node/TypeScript QR library
+* **Card image generation:** server-side HTML-to-image; **not required in Phase 0 or Phase 1**.
+  Phase 1 may prepare card-ready data only; actual card image generation belongs to Phase 2
+  unless explicitly approved.
+
+**Fallback:** Laravel + MySQL is a fallback only if Codex identifies a strong, specific reason
+that Next.js + Supabase is unsuitable for this MVP. If Codex recommends the fallback, it must
+justify why; it should not switch stacks silently.
+
+### Stack-specific rules (these protect PRD boundaries — do not infer around them)
+
+* **Supabase service role key is server-only.** The service role key must only be used in
+  server-side route handlers or server-only utilities. It must **never** be exposed to the
+  browser, client components, public (`NEXT_PUBLIC_*`) environment variables, or generated
+  client code. Default client-side Supabase access must be read/write-limited by RLS.
+* **Guest path is unauthenticated and must not use Supabase Auth.** Restaurant staff have **no
+  account** (PRD: no restaurant login in MVP). The guest write operations — create invoice
+  request, upload invoice via a request-specific link — must run through **server-side Next.js
+  route handlers using the Supabase service role key on the server only** (never the browser),
+  authorized by the **request-specific token**, not by a user identity. Do **not** make
+  restaurant staff sign in, and do **not** widen client-side write access to allow the
+  anonymous path. Use Supabase **Row Level Security** to protect the *authenticated*
+  admin/accounting data; the guest path is gated by server-side token checks instead.
+* **Supabase Storage holds tracking-window files only.** Receipt photos and uploaded invoice
+  files are **temporary tracking-window artifacts**, purged on the 60-day schedule. Supabase is
+  infrastructure for app data, auth, and temporary files — it is **not** the legal invoice
+  archive and does **not** change the "tracker, not store" positioning (PRD §9, §10).
+* **Permission rule is stack-independent.** "Only `company_accounting` can close a request"
+  carries over unchanged; it is now enforced in server-side route handlers plus RLS rather than
+  a Laravel policy. The rule, the nine states, `active_assigned`-as-one-state, opaque tokens,
+  idempotency, and the 60-day window are all unchanged by the stack choice.
+
+### Phase ordering (because the repo is currently docs-only)
+
+| Phase   | Purpose                                                        |
+| ------- | -------------------------------------------------------------- |
+| Phase 0 | Standalone app scaffold, auth, DB/storage setup, CI + test harness, Vercel/GitHub wiring |
+| Phase 1 | InvoTrack backend/domain foundation (models, states, endpoints) |
+| Phase 2 | Guest page + Card Ready flow                                   |
+| Phase 3 | Accounting dashboard + upload/status close                     |
+| Phase 4 | Email onboarding + QR email delivery                           |
+
+**Phase 0 gate:** Phase 0 is complete only when there is a passing test run, a basic
+authenticated app shell, and a working role/permission foundation that can distinguish
+`company_admin` and `company_accounting`. Full request-close permission logic belongs to
+Phase 1 (it acts on request models that do not exist until Phase 1). Do **not** begin Phase 1
+InvoTrack models until this gate is met. Do not conflate Phase 0 and Phase 1 in a single
+implementation step.
 
 ### Codex environment notes
 
 * The Codex agent's own internet access is **off by default** inside the task sandbox. Only
   the **environment setup script** runs with network access.
-* Therefore all dependency installs (e.g. `composer install`, `npm install`) and test-database
-  setup/migrations must happen in the **setup script**, not mid-task.
-* Pin language/runtime versions in the environment settings to match the existing Oda system.
+* Therefore all dependency installs (e.g. `npm install` / `pnpm install`) and any local
+  database/storage setup must happen in the **setup script**, not mid-task.
+* Pin the Node version and package manager in the environment settings. Supabase keys and
+  environment variables are configured via environment settings/secrets, not committed.
 
 ## Core Product Rules
 
@@ -61,8 +122,12 @@ until the role exists, so model it explicitly.
 * **Restaurant staff, assigned employees, QR holders** — have **no** ability to set terminal
   states. Restaurant staff act unauthenticated via request-specific links (no login in MVP).
 
-If the existing Oda system already has a role/permission abstraction, reuse it; do not invent
-a parallel one. The planning run must state which role/permission mechanism it will use.
+Build a standalone role/permission model for InvoTrack. With the preferred stack, this means
+roles/permissions stored in Supabase and enforced via **Supabase RLS for authenticated
+admin/accounting access plus server-side route-handler checks** (the guest path is token-gated,
+not role-gated — see Stack-specific rules). Design `company_admin` and `company_accounting` as
+distinct permissions so future Oda SSO/role mapping is possible, but do not depend on existing
+Oda models in Phase 1. The planning run must state which role/permission mechanism it will use.
 
 ## MVP Request States
 
@@ -313,6 +378,17 @@ Add or update tests for the following behaviors.
 2. Open requests are not extended automatically.
 3. `Visible until` date is available for dashboard display.
 
+### Stack / Security Tests
+
+1. Supabase service role key is never exposed through `NEXT_PUBLIC_*` environment variables.
+2. Guest request creation rejects missing, invalid, expired, or revoked QR/request tokens.
+3. Guest upload endpoint rejects missing, invalid, expired, or revoked request-specific upload
+   tokens.
+4. Authenticated non-`company_accounting` users cannot close requests even through server-side
+   routes.
+5. Client-side Supabase access is limited by RLS and cannot directly write protected
+   request/status fields.
+
 ## Engineering Expectations
 
 Before editing files, Codex must:
@@ -328,8 +404,9 @@ Before editing files, Codex must:
 
 When implementing:
 
-1. Prefer existing project conventions.
-2. Reuse existing auth, roles, file storage, and notification patterns where possible.
+1. Prefer conventions established within this standalone repo (from Phase 0 onward).
+2. Reuse this app's own auth, roles, file storage, and notification patterns once established;
+   do not reach into or depend on the existing Oda codebase.
 3. Avoid adding new production dependencies unless approved.
 4. Add tests for all status and permission rules.
 5. Run relevant tests and linters before finishing.
