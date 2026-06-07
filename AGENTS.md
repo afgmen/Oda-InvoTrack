@@ -25,16 +25,16 @@ should propose a standalone scaffold (Phase 0) before any InvoTrack model work.
 Preferred stack for Phase 0 (chosen for this product on its own merits and for a
 GitHub-based release/iteration workflow, similar to prior projects released via GitHub):
 
-* **Application:** Next.js + TypeScript
-* **UI:** Tailwind CSS + shadcn/ui
-* **Database:** Supabase Postgres
-* **Auth:** Supabase Auth (for the authenticated company admin / accounting side)
-* **File storage:** Supabase Storage (tracking-window files only — see rule below)
-* **Deployment:** Vercel connected to GitHub (PR preview deploys → production on main)
-* **CI:** GitHub Actions (lint, typecheck, tests, build)
-* **Tests:** Vitest for logic/domain, Playwright for main user flows
-* **QR generation:** a Node/TypeScript QR library
-* **Card image generation:** server-side HTML-to-image; **not required in Phase 0 or Phase 1**.
+- **Application:** Next.js + TypeScript
+- **UI:** Tailwind CSS + shadcn/ui
+- **Database:** Supabase Postgres
+- **Auth:** Supabase Auth (for the authenticated company admin / accounting side)
+- **File storage:** Supabase Storage (tracking-window files only — see rule below)
+- **Deployment:** Vercel connected to GitHub (PR preview deploys → production on main)
+- **CI:** GitHub Actions (lint, typecheck, tests, build)
+- **Tests:** Vitest for logic/domain, Playwright for main user flows
+- **QR generation:** a Node/TypeScript QR library
+- **Card image generation:** server-side HTML-to-image; **not required in Phase 0 or Phase 1**.
   Phase 1 may prepare card-ready data only; actual card image generation belongs to Phase 2
   unless explicitly approved.
 
@@ -44,36 +44,36 @@ justify why; it should not switch stacks silently.
 
 ### Stack-specific rules (these protect PRD boundaries — do not infer around them)
 
-* **Supabase service role key is server-only.** The service role key must only be used in
+- **Supabase service role key is server-only.** The service role key must only be used in
   server-side route handlers or server-only utilities. It must **never** be exposed to the
   browser, client components, public (`NEXT_PUBLIC_*`) environment variables, or generated
   client code. Default client-side Supabase access must be read/write-limited by RLS.
-* **Guest path is unauthenticated and must not use Supabase Auth.** Restaurant staff have **no
+- **Guest path is unauthenticated and must not use Supabase Auth.** Restaurant staff have **no
   account** (PRD: no restaurant login in MVP). The guest write operations — create invoice
   request, upload invoice via a request-specific link — must run through **server-side Next.js
   route handlers using the Supabase service role key on the server only** (never the browser),
   authorized by the **request-specific token**, not by a user identity. Do **not** make
   restaurant staff sign in, and do **not** widen client-side write access to allow the
-  anonymous path. Use Supabase **Row Level Security** to protect the *authenticated*
+  anonymous path. Use Supabase **Row Level Security** to protect the _authenticated_
   admin/accounting data; the guest path is gated by server-side token checks instead.
-* **Supabase Storage holds tracking-window files only.** Receipt photos and uploaded invoice
+- **Supabase Storage holds tracking-window files only.** Receipt photos and uploaded invoice
   files are **temporary tracking-window artifacts**, purged on the 60-day schedule. Supabase is
   infrastructure for app data, auth, and temporary files — it is **not** the legal invoice
   archive and does **not** change the "tracker, not store" positioning (PRD §9, §10).
-* **Permission rule is stack-independent.** "Only `company_accounting` can close a request"
+- **Permission rule is stack-independent.** "Only `company_accounting` can close a request"
   carries over unchanged; it is now enforced in server-side route handlers plus RLS rather than
   a Laravel policy. The rule, the nine states, `active_assigned`-as-one-state, opaque tokens,
   idempotency, and the 60-day window are all unchanged by the stack choice.
 
 ### Phase ordering (because the repo is currently docs-only)
 
-| Phase   | Purpose                                                        |
-| ------- | -------------------------------------------------------------- |
+| Phase   | Purpose                                                                                  |
+| ------- | ---------------------------------------------------------------------------------------- |
 | Phase 0 | Standalone app scaffold, auth, DB/storage setup, CI + test harness, Vercel/GitHub wiring |
-| Phase 1 | InvoTrack backend/domain foundation (models, states, endpoints) |
-| Phase 2 | Guest page + Card Ready flow                                   |
-| Phase 3 | Accounting dashboard + upload/status close                     |
-| Phase 4 | Email onboarding + QR email delivery                           |
+| Phase 1 | InvoTrack backend/domain foundation (models, states, endpoints)                          |
+| Phase 2 | Guest page + Card Ready flow                                                             |
+| Phase 3 | Accounting dashboard + upload/status close                                               |
+| Phase 4 | Email onboarding + QR email delivery                                                     |
 
 **Phase 0 gate:** Phase 0 is complete only when there is a passing test run, a basic
 authenticated app shell, and a working role/permission foundation that can distinguish
@@ -84,11 +84,11 @@ implementation step.
 
 ### Codex environment notes
 
-* The Codex agent's own internet access is **off by default** inside the task sandbox. Only
+- The Codex agent's own internet access is **off by default** inside the task sandbox. Only
   the **environment setup script** runs with network access.
-* Therefore all dependency installs (e.g. `npm install` / `pnpm install`) and any local
+- Therefore all dependency installs (e.g. `npm install` / `pnpm install`) and any local
   database/storage setup must happen in the **setup script**, not mid-task.
-* Pin the Node version and package manager in the environment settings. Supabase keys and
+- Pin the Node version and package manager in the environment settings. Supabase keys and
   environment variables are configured via environment settings/secrets, not committed.
 
 ## Core Product Rules
@@ -113,13 +113,13 @@ Always preserve these rules:
 The permission rules below ("only company accounting can close a request") are unenforceable
 until the role exists, so model it explicitly.
 
-* **`company_accounting`** — the only role permitted to set terminal request states
+- **`company_accounting`** — the only role permitted to set terminal request states
   (`resolved`, `rejected`, `cancelled`) and to review uploaded invoices.
-* **`company_admin`** — manages company invoice profile, QR generation, assignment, and
+- **`company_admin`** — manages company invoice profile, QR generation, assignment, and
   revocation. May or may not also hold `company_accounting`; do not assume they are the same.
-* A user may hold both `company_admin` and `company_accounting`; request closing is gated by
+- A user may hold both `company_admin` and `company_accounting`; request closing is gated by
   the `company_accounting` permission, not by the person's title, identity, or admin status.
-* **Restaurant staff, assigned employees, QR holders** — have **no** ability to set terminal
+- **Restaurant staff, assigned employees, QR holders** — have **no** ability to set terminal
   states. Restaurant staff act unauthenticated via request-specific links (no login in MVP).
 
 Build a standalone role/permission model for InvoTrack. With the preferred stack, this means
@@ -171,9 +171,9 @@ Allowed transition rules:
 
 Terminal states:
 
-* `resolved`
-* `rejected`
-* `cancelled`
+- `resolved`
+- `rejected`
+- `cancelled`
 
 Only the `company_accounting` role can set terminal states. Restaurant staff, assigned
 employees, and QR holders must not directly close a request.
@@ -184,16 +184,16 @@ The MVP does not include a structured employee follow-up response workflow.
 
 Employee actions are lightweight response events only. Examples:
 
-* entering restaurant name
-* uploading receipt
-* reporting cancellation
+- entering restaurant name
+- uploading receipt
+- reporting cancellation
 
 These actions must be recorded as events/notes for company accounting. They must not
 automatically change request status.
 
 Example event type:
 
-* `employee_reported_cancelled`
+- `employee_reported_cancelled`
 
 ## QR Token Rules
 
@@ -201,11 +201,11 @@ QR tokens must be random, opaque, and non-reversible.
 
 Do not encode or expose:
 
-* company ID
-* employee ID
-* database IDs
-* company tax code
-* personal data
+- company ID
+- employee ID
+- database IDs
+- company tax code
+- personal data
 
 Store only a hash of the QR token where appropriate; resolve the token via a lookup, not by
 decoding it. Do not use a reversible/encoded scheme (e.g. a JWT or base64-packed ID) that
@@ -221,10 +221,10 @@ QR codes belong to the company first.
 
 Ownership is represented by **exactly four** states (PRD §16):
 
-* `active_unassigned`
-* `active_assigned`
-* `claim_pending`
-* `revoked`
+- `active_unassigned`
+- `active_assigned`
+- `claim_pending`
+- `revoked`
 
 Important: "assigned to an email" and "assigned to an employee" are **both** the single
 `active_assigned` state, distinguished only by which columns are populated
@@ -238,8 +238,8 @@ active QR limit.
 
 Every invoice request must have:
 
-* `requested_at`
-* `visible_until`
+- `requested_at`
+- `visible_until`
 
 Default:
 
@@ -267,11 +267,11 @@ in Phase 1.
 
 The request creation flow may capture:
 
-* request time
-* IP address
-* user agent / browser-device information
-* IP-based approximate location
-* GPS latitude/longitude only if the user allows browser location access
+- request time
+- IP address
+- user agent / browser-device information
+- IP-based approximate location
+- GPS latitude/longitude only if the user allows browser location access
 
 The guest page must show a short non-blocking notice before request submission. Do not require
 restaurant staff login for MVP.
@@ -288,17 +288,17 @@ during the tracking window.
 
 Supported upload types:
 
-* PDF
-* XML
-* image
-* link
+- PDF
+- XML
+- image
+- link
 
 Uploading an invoice does not automatically resolve the request. The `company_accounting` role
 must review and close it as:
 
-* `resolved`
-* `rejected`
-* `cancelled`
+- `resolved`
+- `rejected`
+- `cancelled`
 
 ## Phase 1 Implementation Scope
 
