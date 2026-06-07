@@ -4,7 +4,7 @@ export default function HomePage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-5xl items-center px-6 py-16">
       <section className="max-w-2xl space-y-8">
-        <p className="font-mono text-sm font-medium uppercase tracking-[0.2em] text-primary">
+        <p className="font-mono text-sm font-medium tracking-[0.2em] text-primary">
           Oda InvoTrack
         </p>
         <div className="space-y-4">

@@ -5,7 +5,7 @@ export default function SignInPage() {
     <main className="mx-auto flex min-h-screen max-w-md items-center px-6 py-16">
       <section className="w-full rounded-xl border bg-card p-7 shadow-sm">
         <div className="mb-7 space-y-2">
-          <p className="font-mono text-xs font-medium uppercase tracking-[0.18em] text-primary">
+          <p className="font-mono text-xs font-medium tracking-[0.18em] text-primary">
             Oda InvoTrack
           </p>
           <h1 className="text-2xl font-semibold tracking-tight">Đăng nhập</h1>

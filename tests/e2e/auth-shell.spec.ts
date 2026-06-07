@@ -15,6 +15,9 @@ test("public landing page identifies the product as a tracker", async ({
 }) => {
   await page.goto("/");
 
-  await expect(page.getByText("Oda InvoTrack", { exact: true })).toBeVisible();
+  const brand = page.getByText("Oda InvoTrack", { exact: true });
+
+  await expect(brand).toBeVisible();
+  await expect(brand).toHaveCSS("text-transform", "none");
   await expect(page.getByText(/không thay thế kho lưu trữ/i)).toBeVisible();
 });
