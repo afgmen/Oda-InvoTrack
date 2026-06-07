@@ -48,6 +48,9 @@ Populate `.env.local` from `pnpm exec supabase status -o env`, then run:
 pnpm dev
 ```
 
+The app runs at `http://127.0.0.1:3100`. Local magic-link emails are captured
+by Mailpit at `http://127.0.0.1:54324`; they are not delivered to a real inbox.
+
 The local start command excludes optional services not used in Phase 0: Edge
 Functions, Realtime, analytics, vector search, image proxying, and Studio.
 

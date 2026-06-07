@@ -14,6 +14,20 @@ export default function SignInPage() {
           </p>
         </div>
         <MagicLinkForm />
+        {process.env.NODE_ENV === "development" ? (
+          <p className="mt-5 text-sm text-muted-foreground">
+            Email local không được gửi ra ngoài. Mở{" "}
+            <a
+              className="font-medium text-primary underline underline-offset-4"
+              href="http://127.0.0.1:54324"
+              rel="noreferrer"
+              target="_blank"
+            >
+              hộp thư thử nghiệm
+            </a>{" "}
+            để lấy liên kết đăng nhập.
+          </p>
+        ) : null}
       </section>
     </main>
   );

@@ -36,7 +36,7 @@ writeFileSync(
     `NEXT_PUBLIC_SUPABASE_URL=${apiUrl}`,
     `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${publishableKey}`,
     `SUPABASE_SERVICE_ROLE_KEY=${serviceRoleKey}`,
-    "NEXT_PUBLIC_APP_URL=http://localhost:3000",
+    "NEXT_PUBLIC_APP_URL=http://127.0.0.1:3100",
     "",
   ].join("\n"),
 );

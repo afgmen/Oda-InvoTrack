@@ -8,6 +8,9 @@ test("unauthenticated user is redirected to magic-link sign in", async ({
   await expect(page).toHaveURL(/\/sign-in/);
   await expect(page.getByRole("heading", { name: "Đăng nhập" })).toBeVisible();
   await expect(page.getByLabel("Email công ty")).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "hộp thư thử nghiệm" }),
+  ).toHaveAttribute("href", "http://127.0.0.1:54324");
 });
 
 test("public landing page identifies the product as a tracker", async ({
