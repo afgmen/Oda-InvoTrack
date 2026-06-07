@@ -21,7 +21,7 @@
     "test:e2e": "playwright test",
     "supabase:start": "supabase start -x edge-runtime,imgproxy,realtime,studio,vector,logflare --ignore-health-check",
     "env:local": "node scripts/prepare-local-env.mjs",
-    "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts",
+    "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts && prettier --write src/lib/supabase/database.types.ts",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   },
   "dependencies": {
