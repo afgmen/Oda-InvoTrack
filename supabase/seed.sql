@@ -1,0 +1,10 @@
+-- Phase 0 intentionally has no default users or companies.
+-- Create a user through local magic-link Auth, then use its auth.users.id:
+--
+-- insert into public.companies (id, name)
+-- values ('10000000-0000-0000-0000-000000000001', 'Example Company');
+--
+-- insert into public.company_memberships (company_id, user_id, role)
+-- values
+--   ('10000000-0000-0000-0000-000000000001', '<auth-user-id>', 'company_admin'),
+--   ('10000000-0000-0000-0000-000000000001', '<auth-user-id>', 'company_accounting');
