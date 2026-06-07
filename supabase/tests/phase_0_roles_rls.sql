@@ -1,6 +1,6 @@
 begin;
 
-select plan(16);
+select plan(17);
 
 select has_type('public', 'company_role', 'company_role enum exists');
 select enum_has_labels(
@@ -88,7 +88,15 @@ values
   );
 
 select is(
-  (select count(*) from public.user_profiles),
+  (
+    select count(*)
+    from public.user_profiles
+    where user_id in (
+      '20000000-0000-0000-0000-000000000001',
+      '20000000-0000-0000-0000-000000000002',
+      '20000000-0000-0000-0000-000000000003'
+    )
+  ),
   3::bigint,
   'auth trigger creates one profile per user'
 );
@@ -184,6 +192,17 @@ select throws_ok(
   '42501',
   null,
   'storage buckets deny direct authenticated uploads'
+);
+
+reset role;
+set local role service_role;
+
+select lives_ok(
+  $$
+    insert into public.companies (id, name)
+    values ('10000000-0000-0000-0000-000000000003', 'Service Company')
+  $$,
+  'service role can write trusted server-side company data'
 );
 
 reset role;
