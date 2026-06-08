@@ -216,10 +216,24 @@ test("public landing page identifies the product as a tracker", async ({
   await page.goto("/");
 
   const brand = page.getByText("Oda InvoTrack", { exact: true });
+  const primaryAction = page.getByRole("link", {
+    name: "Đăng nhập quản trị",
+  });
 
   await expect(brand).toBeVisible();
   await expect(brand).toHaveCSS("text-transform", "none");
+  await expect(page.locator("body")).toHaveCSS("font-family", /Noto Sans/);
+  await expect(primaryAction).toHaveCSS("background-color", "rgb(64, 182, 95)");
   await expect(page.getByText(/không thay thế kho lưu trữ/i)).toBeVisible();
+});
+
+test("sign in uses the Oda type and action palette", async ({ page }) => {
+  await page.goto("/sign-in");
+
+  await expect(page.locator("body")).toHaveCSS("font-family", /Noto Sans/);
+  await expect(
+    page.getByRole("button", { name: "Gửi liên kết đăng nhập" }),
+  ).toHaveCSS("background-color", "rgb(64, 182, 95)");
 });
 
 test("company user can sign in, see distinct roles, and sign out", async ({
@@ -257,6 +271,14 @@ test("company user can sign in, see distinct roles, and sign out", async ({
 
     await page.goto(magicLink!);
     await expect(page).toHaveURL(/\/dashboard$/);
+    await expect(page.getByTestId("app-sidebar")).toHaveCSS(
+      "background-color",
+      "rgb(255, 255, 255)",
+    );
+    await expect(page.getByTestId("active-navigation-item")).toHaveCSS(
+      "background-color",
+      "rgb(64, 182, 95)",
+    );
     await expect(
       page.getByRole("heading", { name: "Oda Playwright Company" }),
     ).toHaveCount(2);
@@ -266,6 +288,18 @@ test("company user can sign in, see distinct roles, and sign out", async ({
     await expect(
       page.getByText("company_accounting", { exact: true }),
     ).toBeVisible();
+
+    await page.setViewportSize({ width: 375, height: 812 });
+    await expect(page.getByTestId("app-sidebar")).toBeHidden();
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () =>
+            document.documentElement.scrollWidth <=
+            document.documentElement.clientWidth,
+        ),
+      )
+      .toBe(true);
 
     await page.getByRole("button", { name: "Đăng xuất" }).click();
     await expect(page).toHaveURL(/\/sign-in$/);
