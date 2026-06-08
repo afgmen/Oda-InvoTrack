@@ -19,12 +19,12 @@ export function SignOutButton() {
 
   return (
     <button
-      className="rounded-md border bg-card px-3 py-2 text-sm font-medium disabled:opacity-60"
+      className="inline-flex min-h-11 items-center justify-center rounded-[5px] border bg-card px-4 text-sm font-semibold text-heading hover:border-primary hover:bg-primary-soft hover:text-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
       disabled={isPending}
       onClick={signOut}
       type="button"
     >
-      Đăng xuất
+      {isPending ? "Đang đăng xuất..." : "Đăng xuất"}
     </button>
   );
 }
