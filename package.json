@@ -25,11 +25,11 @@
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.10.3",
-    "@supabase/supabase-js": "^2.107.0",
-    "next": "16.2.7",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
+    "@supabase/ssr": "^0.12.0",
+    "@supabase/supabase-js": "^2.108.1",
+    "next": "16.2.9",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -38,17 +38,17 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
-    "@types/node": "^20",
+    "@types/node": "^25",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.2",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.7",
+    "eslint": "^10",
+    "eslint-config-next": "16.2.9",
     "jsdom": "^29.1.1",
-    "prettier": "^3.8.3",
-    "supabase": "^2.105.0",
+    "prettier": "^3.8.4",
+    "supabase": "^2.106.0",
     "tailwindcss": "^4",
-    "typescript": "^5",
+    "typescript": "^6",
     "vitest": "^4.1.8"
   }
 }
